@@ -1,7 +1,10 @@
 import { OBJECTS, KNAPSACK } from './knapsack'
 import {generateRandomBinaryArray} from './utils'
-import { times, concat, splitAt, remove, contains, update } from 'ramda';
+import { times, concat, splitAt, remove, contains, update, compose, range, reduce } from 'ramda';
+import seedrandom from 'seedrandom';
 
+const rng = seedrandom('its time for a real random number you know..., or31 maybe... ', { entropy: true });
+console.log(rng());
 function getTotalWeightAndValue(individual) {
     return individual.reduce(({weight, value}, val) =>
         ({ weight: weight + OBJECTS[val].weight, value: value + OBJECTS[val].value})
@@ -17,7 +20,7 @@ function addFitness(chromosome) {
 
     let totalWeightAndValue = getTotalWeightAndValue(includedObjectsIndex);
     while (totalWeightAndValue.weight > KNAPSACK.size) {
-        const indexToRemove = Math.floor(Math.random() * includedObjectsIndex.length);
+        const indexToRemove = Math.floor(rng() * includedObjectsIndex.length);
         const { weight, value } = OBJECTS[includedObjectsIndex[indexToRemove]];
 
         totalWeightAndValue = {
@@ -45,22 +48,42 @@ function addFitness(chromosome) {
 
 const byFitness = (indA, indB) => indB.fitness - indA.fitness;
 
-function tournament(population, amount) {
-    const participants = times(() => {
-        const index = Math.round(Math.random() * (population.length - 1))
+const selectAndRemoveWinners = (removeWinners, population, selected) =>
+    ({ index, ...selectedIndividual }) => ({
+        selected: [...selected, selectedIndividual],
+        availablePopulation: removeWinners
+            ? remove(index, 1, population)
+            : population,
+    });
 
-        if (index < 0 || index > 99) { throw new Error() }
-        return population[index]
-    }, amount
+const tournamentOf = tournamentSize => population =>
+    Array(tournamentSize)
+        .fill()
+        .map((participant, index) =>
+            ({
+                ...population[Math.round(rng() * (population.length - 1))],
+                index,
+            }))
+        .reduce((winner, ind) => (ind.fitness > winner.fitness ? ind : winner), { fitness: 0 });
+
+function tournament(amount, population, { tournamentSize = 2, removeWinners } = {}) {
+    const { selected: selectedIndividuals } = reduce(
+        ({ selected, availablePopulation }) =>
+            compose(
+                selectAndRemoveWinners(removeWinners, availablePopulation, selected),
+                tournamentOf(tournamentSize),
+            )(availablePopulation)
+        ,
+        { selected: [], availablePopulation: population },
+        range(0, amount),
     );
 
-    if (!participants.sort(byFitness)[0]) { throw new Error()}
-    return participants.sort(byFitness)[0];
+    return selectedIndividuals;
 }
 
 const POPULATION_SIZE = 100;
 const GENERATIONS = 9999;
-const MUTATION_PROB = 0.05;
+const MUTATION_PROB = 0.4;
 const CROSSOVER_PROB = 0.8;
 const TOURNAMENT_SIZE = 5;
 
@@ -79,7 +102,7 @@ const generateIndividualFromChromosome = (chromosome) => {
 };
 
 const onePointCrossover = (chromosome1, chromosome2) => {
-    const point = Math.floor(Math.random() * (chromosome1.length - 1));
+    const point = Math.floor(rng() * (chromosome1.length - 1));
 
     const [chromosome1_front, chromosome1_back] = splitAt(point, chromosome1);
     const [chromosome2_front, chromosome2_back] = splitAt(point, chromosome2);
@@ -88,7 +111,7 @@ const onePointCrossover = (chromosome1, chromosome2) => {
 };
 
 const flipMutation = (chromosome) => {
-    const flipIndex = Math.round(Math.random() * (chromosome.length - 1));
+    const flipIndex = Math.round(rng() * (chromosome.length - 1));
     return update(flipIndex, !chromosome[flipIndex], chromosome)
 };
 
@@ -96,7 +119,7 @@ const generateOffspring = (individual1, individual2) => {
     const offspring = onePointCrossover(individual1.chromosome, individual2.chromosome);
 
     return offspring.map(individual => {
-        const individualToTransform = Math.random() < MUTATION_PROB
+        const individualToTransform = rng() < MUTATION_PROB
             ? flipMutation(individual)
             : individual;
 
@@ -108,19 +131,17 @@ export const startGA = ({ onNewGeneration}) => {
     const initialPopulation = generateInitialPopulation();
     let population = Array.from(initialPopulation);
 
-    console.log(population);
     for (let i = 0; i < GENERATIONS; i++) {
-
+        let crossOver = 0
         console.log(`${i} generation/ BEST INDIVIDUAL: `, population[0]);
-        console.log(population);
+        // console.log(population);
         let nextPopulation = [population[0], population[1]];
         while (nextPopulation.length !== initialPopulation.length) {
-            const selectedIndividual1 = tournament(population, 2);
-            const selectedIndividual2 = tournament(population, 2);
+            const [selectedIndividual1, selectedIndividual2] = tournament(2, population, { tournamentSize: 4, removeWinners: true });
 
-            if (Math.random() > CROSSOVER_PROB) {
+            if (rng() < CROSSOVER_PROB) {
                 const offspring = generateOffspring(selectedIndividual2, selectedIndividual1);
-
+                crossOver += 2;
                 nextPopulation = concat(offspring, nextPopulation);
             } else {
                 nextPopulation = concat([selectedIndividual1, selectedIndividual2], nextPopulation);

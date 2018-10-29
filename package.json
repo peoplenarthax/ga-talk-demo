@@ -6,7 +6,8 @@
     "ramda": "^0.25.0",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
-    "react-scripts": "2.0.5"
+    "react-scripts": "2.0.5",
+    "seedrandom": "^2.4.4"
   },
   "scripts": {
     "start": "react-scripts start",

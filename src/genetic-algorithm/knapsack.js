@@ -1,16 +1,166 @@
 export const OBJECTS = [
-    { weight: 3, value: 16},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
-    { weight: 9, value: 30},
+    {
+        weight:15,
+        value:8
+    },
+    {
+        weight:8,
+        value:36
+    },
+    {
+        weight:9,
+        value:13
+    },
+    {
+        weight:9,
+        value:40
+    },
+    {
+        weight:2,
+        value:33
+    },
+    {
+        weight:1,
+        value:17
+    },
+    {
+        weight:5,
+        value:24
+    },
+    {
+        weight:13,
+        value:24
+    },
+    {
+        weight:3,
+        value:3
+    },
+    {
+        weight:9,
+        value:19
+    },
+    {
+        weight:16,
+        value:50
+    },
+    {
+        weight:11,
+        value:4
+    },
+    {
+        weight:14,
+        value:7
+    },
+    {
+        weight:5,
+        value:3
+    },
+    {
+        weight:16,
+        value:6
+    },
+    {
+        weight:12,
+        value:49
+    },
+    {
+        weight:15,
+        value:26
+    },
+    {
+        weight:17,
+        value:9
+    },
+    {
+        weight:16,
+        value:53
+    },
+    {
+        weight:8,
+        value:5
+    },
+    {
+        weight:9,
+        value:48
+    },
+    {
+        weight:6,
+        value:52
+    },
+    {
+        weight:1,
+        value:39
+    },
+    {
+        weight:9,
+        value:6
+    },
+    {
+        weight:13,
+        value:48
+    },
+    {
+        weight:13,
+        value:39
+    },
+    {
+        weight:13,
+        value:39
+    },
+    {
+        weight:5,
+        value:32
+    },
+    {
+        weight:12,
+        value:55
+    },
+    {
+        weight:14,
+        value:53
+    },
+    {
+        weight:12,
+        value:33
+    },
+    {
+        weight:14,
+        value:1
+    },
+    {
+        weight:14,
+        value:36
+    },
+    {
+        weight:17,
+        value:17
+    },
+    {
+        weight:11,
+        value:31
+    },
+    {
+        weight:12,
+        value:14
+    },
+    {
+        weight:7,
+        value:37
+    },
+    {
+        weight:3,
+        value:52
+    },
+    {
+        weight:9,
+        value:44
+    },
+    {
+        weight:18,
+        value:17
+    }
 ];
 
 export const KNAPSACK = {
-    size: 30
+    size: 45
 };
