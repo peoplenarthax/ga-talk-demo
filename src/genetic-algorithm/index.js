@@ -1,26 +1,60 @@
-import { FINAL_MAP, POINTS } from './tspGraph'
-import { shuffle } from './utils'
-import { times, concat, splitAt } from 'ramda';
+import { OBJECTS, KNAPSACK } from './knapsack'
+import {generateRandomBinaryArray} from './utils'
+import { times, concat, splitAt, remove, contains, update } from 'ramda';
 
-function calcFitness(individual) {
-    let totalDistance = FINAL_MAP['A'][individual[0]];
-
-    for(let i = 0; i < individual.length; i++) {
-        if ( (i + 1) < individual.length) {
-            totalDistance += FINAL_MAP[individual[i]][individual[i+1]];
-        } else {
-            totalDistance += FINAL_MAP[individual[i]]['A'];
-        }
-    }
-
-    return totalDistance;
+function getTotalWeightAndValue(individual) {
+    return individual.reduce(({weight, value}, val) =>
+        ({ weight: weight + OBJECTS[val].weight, value: value + OBJECTS[val].value})
+    , {weight: 0, value: 0});
 }
 
-const byFitness = (indA, indB) => indA.fitness - indB.fitness;
+function addFitness(chromosome) {
+    let includedObjectsIndex = chromosome.reduce((acc, val, ind) => val ?
+        [...acc, ind]
+        : acc
+    , []);
+    const objectsIncluded = includedObjectsIndex.length;
+
+    let totalWeightAndValue = getTotalWeightAndValue(includedObjectsIndex);
+    while (totalWeightAndValue.weight > KNAPSACK.size) {
+        const indexToRemove = Math.floor(Math.random() * includedObjectsIndex.length);
+        const { weight, value } = OBJECTS[includedObjectsIndex[indexToRemove]];
+
+        totalWeightAndValue = {
+            weight: totalWeightAndValue.weight - weight,
+            value: totalWeightAndValue.value - value,
+        };
+
+        includedObjectsIndex = remove(indexToRemove, 1, includedObjectsIndex);
+    }
+
+    if (objectsIncluded !== includedObjectsIndex.length) {
+        return {
+            chromosome: Array.from({
+                    length: chromosome.length
+                }, (_, index) => contains(index, includedObjectsIndex) ? 1 : 0 ),
+            fitness: totalWeightAndValue.value
+        };
+    }
+    return {
+        chromosome,
+        fitness: totalWeightAndValue.value
+    }
+}
+
+
+const byFitness = (indA, indB) => indB.fitness - indA.fitness;
 
 function tournament(population, amount) {
-    const participants = times(() => population[Math.round(Math.random() * population.length)], amount);
+    const participants = times(() => {
+        const index = Math.round(Math.random() * (population.length - 1))
 
+        if (index < 0 || index > 99) { throw new Error() }
+        return population[index]
+    }, amount
+    );
+
+    if (!participants.sort(byFitness)[0]) { throw new Error()}
     return participants.sort(byFitness)[0];
 }
 
@@ -31,8 +65,8 @@ const CROSSOVER_PROB = 0.8;
 const TOURNAMENT_SIZE = 5;
 
 const generateRandomIndividual = () => {
-    const chromosome = shuffle(POINTS)  ;
-    return { chromosome, fitness: calcFitness(chromosome)  }
+    const chromosome = generateRandomBinaryArray(OBJECTS.length)  ;
+    return addFitness(chromosome)
 };
 
 const generateInitialPopulation = () => {
@@ -40,72 +74,30 @@ const generateInitialPopulation = () => {
             .sort(byFitness);
 };
 
-function generateIndividualFromChromosome(chromosome) {
-    return {
-        chromosome,
-        fitness: calcFitness(chromosome)
-    }
-}
-
-const swapMutation = (chromosome) => {
-    let mutatedChromosome = chromosome;
-
-    const index1 = Math.floor(Math.random() * mutatedChromosome.length);
-    const index2 = Math.floor(Math.random() * mutatedChromosome.length);
-
-    let temp1 = mutatedChromosome[index1];
-    if (temp1 === undefined) {
-        throw new Error();
-    }
-    mutatedChromosome[index1] = mutatedChromosome[index2];
-    mutatedChromosome[index2] = temp1;
-
-    return mutatedChromosome;
+const generateIndividualFromChromosome = (chromosome) => {
+    return addFitness(chromosome);
 };
 
-const pmxCrossover = (ind1, ind2) => {
-    let _map1 = {};
-    let _map2 = {};
+const onePointCrossover = (chromosome1, chromosome2) => {
+    const point = Math.floor(Math.random() * (chromosome1.length - 1));
 
-    const point1 = Math.floor(Math.random() * (ind1.length - 1));
-    const point2 = point1 + Math.floor(Math.random() * (ind1.length - point1));
+    const [chromosome1_front, chromosome1_back] = splitAt(point, chromosome1);
+    const [chromosome2_front, chromosome2_back] = splitAt(point, chromosome2);
 
-    let offspring = [Array.from(ind1), Array.from(ind2)];
+    return [concat(chromosome1_front, chromosome2_back), concat(chromosome2_front, chromosome1_back)];
+};
 
-    for (let i = point1; i < point2; i++) {
-        offspring[0][i] = ind2[i];
-        _map1[ind2[i]] = ind1[i];
-
-        offspring[1][i] = ind1[i];
-        _map2[ind1[i]] = ind2[i];
-    }
-
-    for (let i = 0; i < point1; i++) {
-        while (offspring[0][i] in _map1) {
-            offspring[0][i] = _map1[offspring[0][i]];
-        }
-        while (offspring[1][i] in _map2) {
-            offspring[1][i] = _map2[offspring[1][i]];
-        }
-    }
-
-    for (let i = point2; i < ind1.length; i++) {
-        while (offspring[0][i] in _map1) {
-            offspring[0][i] = _map1[offspring[0][i]];
-        }
-        while (offspring[1][i] in _map2) {
-            offspring[1][i] = _map2[offspring[1][i]];
-        }
-    }
-    return offspring;
+const flipMutation = (chromosome) => {
+    const flipIndex = Math.round(Math.random() * (chromosome.length - 1));
+    return update(flipIndex, !chromosome[flipIndex], chromosome)
 };
 
 const generateOffspring = (individual1, individual2) => {
-    const offspring = pmxCrossover(individual1.chromosome, individual2.chromosome);
+    const offspring = onePointCrossover(individual1.chromosome, individual2.chromosome);
 
     return offspring.map(individual => {
         const individualToTransform = Math.random() < MUTATION_PROB
-            ? swapMutation(individual)
+            ? flipMutation(individual)
             : individual;
 
         return generateIndividualFromChromosome(individualToTransform);
@@ -115,6 +107,8 @@ const generateOffspring = (individual1, individual2) => {
 export const startGA = ({ onNewGeneration}) => {
     const initialPopulation = generateInitialPopulation();
     let population = Array.from(initialPopulation);
+
+    console.log(population);
     for (let i = 0; i < GENERATIONS; i++) {
 
         console.log(`${i} generation/ BEST INDIVIDUAL: `, population[0]);
