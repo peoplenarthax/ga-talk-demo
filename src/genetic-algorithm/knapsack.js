@@ -162,5 +162,5 @@ export const OBJECTS = [
 ];
 
 export const KNAPSACK = {
-    size: 45
+    size: 30
 };
