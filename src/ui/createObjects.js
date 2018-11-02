@@ -10,13 +10,17 @@ const multipleObjects = {
     'bad-heavy-item': 8
 };
 
+export const generateItems = (length) => Array.from({ length: length},
+    () => ({weight: Math.floor(Math.random() * 15) + 1, value: Math.floor((Math.random()*Math.random())*100)}))
+    .map((item) => ({...item, object: getObject(item)}))
+
 const getObjectName = objectName => {
     return multipleObjects[objectName]
         ? `${objectName}${Math.round(Math.random() * (multipleObjects[objectName] - 1))}`
         : objectName
 }
 
-const getObject = ({value, weight}) => {
+export const getObject = ({value, weight}) => {
     if (weight > 11) {
         if (value > 60) {
             return getObjectName('good-heavy-item');
