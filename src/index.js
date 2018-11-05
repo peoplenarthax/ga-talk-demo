@@ -5,7 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { generateItems } from "./ui/createObjects";
 
-const items = generateItems(40);
+const items = generateItems(140);
 
 ReactDOM.render(<App items={items} />, document.getElementById('root'));
 
