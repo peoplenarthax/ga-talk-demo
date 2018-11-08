@@ -54,15 +54,10 @@ export const startGA = ({ best }) => {
     return new Promise((resolve) => {
         const initialPopulation = generateInitialPopulation(POPULATION_SIZE, objects);
         let population = Array.from(initialPopulation);
-        console.log(population);
         for (let i = 0; i < GENERATIONS; i++) {
             // TODO: Better handling async
             setTimeout(() => {
             console.log(`${i} generation/ BEST INDIVIDUAL: `, population[0]);
-            if (i === 998 ) {
-                console.log('CALLING THIS METHOD');
-                best(population[0].chromosome);
-            }
             let nextPopulation = [population[0], population[1]];
             while (nextPopulation.length !== initialPopulation.length) {
                 const [selectedIndividual1, selectedIndividual2] = tournament(2, population, { tournamentSize: TOURNAMENT_SIZE, removeWinners: true });
@@ -74,11 +69,20 @@ export const startGA = ({ best }) => {
                     nextPopulation = concat([selectedIndividual1, selectedIndividual2], nextPopulation);
                 }
             }
+
+
             if (nextPopulation.filter(({fitness}) => population[0].fitness === fitness).length > POPULATION_SIZE/2) {
                 population = [population[0], ...generateInitialPopulation(POPULATION_SIZE - 1)];
             } else {
-                population = nextPopulation.sort(byFitness);
+                const sortedPopulation = nextPopulation.sort(byFitness);
+                if (population[0].fitness < sortedPopulation[0].fitness ) {
+                    console.log('CALLING THIS METHOD');
+                    best(nextPopulation[0]);
+                }
+                population = sortedPopulation;
             }
+
+
             }, 0)
         }
 
