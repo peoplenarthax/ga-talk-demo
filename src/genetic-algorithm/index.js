@@ -77,7 +77,7 @@ export const startGA = ({ best }) => {
                 const sortedPopulation = nextPopulation.sort(byFitness);
                 if (population[0].fitness < sortedPopulation[0].fitness ) {
                     console.log('CALLING THIS METHOD');
-                    best(nextPopulation[0]);
+                    best({...nextPopulation[0], generation: i + 1});
                 }
                 population = sortedPopulation;
             }

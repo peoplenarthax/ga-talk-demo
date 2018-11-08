@@ -3,6 +3,10 @@ import './App.css';
 import {setObjects, startGA} from './genetic-algorithm'
 import {WorldItems} from "./ui/WorldItems";
 import {Knapsack} from "./ui/Knapsack";
+import {EquipmentItem} from "./ui/EquipmentItem";
+import {Box} from "./ui/Box";
+import {BestItem} from "./ui/BestItem";
+import {GenerationsBox} from "./ui/GenerationsBox";
 
 class App extends Component {
   state = {
@@ -46,7 +50,11 @@ class App extends Component {
                     <button className="start-button" onClick={this.startGa}> Start </button>
                   </div>
                   <div className="stat-boxes">
-                      {this.state.generations.map((gen, index) => <p key={gen.fitness} onClick={this.showGen(index)}>{gen.fitness}</p>)}
+                      <BestItem item={this.props.bestItem} />
+
+                      <GenerationsBox title="Generations"
+                        content={this.state.generations.map((gen, index) => <div key={gen.fitness} className="generation-button" onClick={this.showGen(index)}>Generation nr. {gen.generation}</div>)}
+                      />
                   </div>
                   <WorldItems items={this.props.items} />
               </div>

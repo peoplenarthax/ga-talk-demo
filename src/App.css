@@ -81,6 +81,50 @@
 }
 
 .stat-boxes {
+    height: 150px;
+    display: flex;
+}
+
+.generation-button {
+    font-size: 1.5rem;
+    text-align: center;
+    height: 20px;
+    color: yellow;
+    padding: 5px;
+    background-color: #7f5f41;
+    border: solid 1px black;
+}
+
+.generation-button:hover {
+    background-color: #B8956F;
+}
+
+
+.best-item-wrapper {
+    flex: 1;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.best-item-content {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    height: 100%;
+}
+
+.generations {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+}
+.generations .world-items {
+    flex-wrap: nowrap;
+    flex-direction: column;
+}
+
+.generations-container {
     overflow: scroll;
-    height: 300px;
+    border: solid;
 }
