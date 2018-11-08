@@ -9,10 +9,10 @@ const rng = seedrandom('its time for a real random number you know..., or31 mayb
 
 const byFitness = (indA, indB) => indB.fitness - indA.fitness;
 
-const POPULATION_SIZE = 100;
+let POPULATION_SIZE = 100;
 const GENERATIONS = 999;
-const MUTATION_PROB = 0.4;
-const CROSSOVER_PROB = 0.8;
+let MUTATION_PROB = 0.4;
+let CROSSOVER_PROB = 0.8;
 const TOURNAMENT_SIZE = 5;
 
 let objects;
@@ -50,7 +50,11 @@ const generateOffspring = (individual1, individual2) => {
     });
 };
 
-export const startGA = ({ best }) => {
+export const startGA = ({ onNewGeneration, gaParameters }) => {
+    POPULATION_SIZE = gaParameters.populationSize;
+    MUTATION_PROB = gaParameters.mutationProb / 10;
+    CROSSOVER_PROB = gaParameters.crossoverProb / 10;
+
     return new Promise((resolve) => {
         const initialPopulation = generateInitialPopulation(POPULATION_SIZE, objects);
         let population = Array.from(initialPopulation);
@@ -76,8 +80,7 @@ export const startGA = ({ best }) => {
             } else {
                 const sortedPopulation = nextPopulation.sort(byFitness);
                 if (population[0].fitness < sortedPopulation[0].fitness ) {
-                    console.log('CALLING THIS METHOD');
-                    best({...nextPopulation[0], generation: i + 1});
+                    onNewGeneration({...nextPopulation[0], generation: i + 1});
                 }
                 population = sortedPopulation;
             }

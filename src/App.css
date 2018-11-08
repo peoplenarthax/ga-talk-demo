@@ -7,6 +7,7 @@
     width: 48px;
     height: 48px;
     padding: 5px;
+    font-size: 12px;
 }
 .knap-pack--item-value {
     display:flex;
@@ -38,7 +39,7 @@
 }
 
 .world-items.knapsack {
-    width: 240px;
+    width: 240x;
 }
 
 .world-items--wrapper {
@@ -56,9 +57,12 @@
     border: solid 1px black;
 }
 .world-items--inner-box.knapsack {
-    width: 240px;
     height: 540px;
+}
 
+.world-items--wrapper.knapsack {
+    width: 303px;
+    margin: 0 10px;
 }
 
 .world-items--wrapper-title {
@@ -69,15 +73,23 @@
     -webkit-text-stroke: 1px #b1aa23;
 }
 
+.world-items--wrapper-bottom {
+    margin-bottom: 5px;
+    font-size: 18px;
+    color: #FFF40B;
+    -webkit-text-stroke: 1px #b1aa23;
+}
+
 .App {
     display: flex;
-    margin: 20px 145px;
+    margin: 20px 135px;
 }
 
 .main-pane {
     display:flex;
     flex:1;
     flex-direction: column;
+    justify-content: space-between;
 }
 
 .stat-boxes {
@@ -118,6 +130,7 @@
     width: 300px;
     display: flex;
     flex-direction: column;
+    margin: 0 20px;
 }
 .generations .world-items {
     flex-wrap: nowrap;
@@ -128,3 +141,79 @@
     overflow: scroll;
     border: solid;
 }
+
+.our-weight {
+    color: #72efbd;
+    -webkit-text-stroke: 1px #009e94;
+}
+
+.stats { flex: 1;}
+
+.stats .best-item-wrapper {
+    color: #FFF40B;
+    display: flex;
+    flex-direction: column;
+}
+
+.improvement {
+    color: #4eded5;
+    font-weight: bold;
+}
+
+.input-boxes{
+    display: flex;
+    justify-content: space-around;
+}
+
+input[type="number"] {
+    text-align: right;
+    border: none;
+    color: #e9e000;
+    font-family: VT323;
+    font-size: 24px;
+    background-color: #8a7563;
+}
+
+.start-button {
+    background: #7f5f41;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    font-size: 30px;
+    padding: 20px;
+    text-decoration: none;
+    color: #e9e000;
+    box-shadow: inset -4px -4px 0px 0px black;
+}
+.start-button:hover,
+.start-button:focus {
+     background: #8e7460;
+     box-shadow: inset -5px -5px 0px 0px black;
+ }
+
+.start-button:active {
+     box-shadow: inset 4px 4px 0px 0px black;
+ }
+
+.start-button:before,
+.start-button:after {
+     content: '';
+     position: absolute;
+     width: 100%;
+     height: 100%;
+     box-sizing: content-box;
+ }
+
+.start-button:before {
+     top: -4px;
+     left: 0;
+     border-top: 4px black solid;
+     border-bottom: 4px black solid;
+ }
+
+button.start-button:after {
+     left: -6px;
+     top: 1;
+     border-left: 4px black solid;
+     border-right: 4px black solid;
+ }
