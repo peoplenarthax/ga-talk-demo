@@ -19,6 +19,10 @@ class App extends Component {
       populationSize: 100
   }
 
+  componentDidMount() {
+    setObjects(this.props.items);
+  }
+
   getItemsInChromosome = (chromosome) => chromosome.reduce((acc, item, index) => {
         return item === 1
             ? [...acc, this.props.items[index]]
@@ -26,33 +30,39 @@ class App extends Component {
     }, []);
 
   startGa = () => {
-      this.setState({generations: []},
-          () => startGA({
-              onNewGeneration: this.onNewGeneration,
-              gaParameters: {
-                  mutationProb: this.state.mutationProb,
-                  crossoverProb: this.state.crossoverProb,
-                  populationSize: this.state.populationSize,
-              }
-          })
-      );
+      this.setState({generations: []})
+      startGA({
+        onNewGeneration: this.onNewGeneration,
+        gaParameters: {
+            mutationProb: this.state.mutationProb,
+            crossoverProb: this.state.crossoverProb,
+            populationSize: this.state.populationSize,
+        }
+    })
   }
 
-    onNewGeneration = (individual) => {
-      const bestIndividual = { items: this.getItemsInChromosome(individual.chromosome), fitness: individual.fitness};
+    onNewGeneration = (population, generation) => {
+      const individual = population[0]
 
-      this.setState(prevState => ({
-          bestIndividual,
-          generations: [...prevState.generations, individual]
-      }));
+      if (individual.fitness > this.state.bestIndividual.fitness) {
+        const bestIndividual = { items: this.getItemsInChromosome(individual.genome), fitness: individual.fitness, generation};
+
+        this.setState(prevState => ({
+            bestIndividual,
+            generations: [...prevState.generations, {...individual, generation}]
+        }));
+      }
+      
   }
 
   showGen = (index) => () =>
   {
+      console.log(index)
+      console.log(this.state.generations[index])
       this.setState({
           bestIndividual:
               {
-                  items: this.getItemsInChromosome(this.state.generations[index].chromosome),
+                  items: this.getItemsInChromosome(this.state.generations[index].genome),
                   fitness: this.state.generations[index].fitness
               }
       });
@@ -74,8 +84,7 @@ class App extends Component {
     }
 
   render() {
-      setObjects(this.props.items);
-
+      
     return (
       <div className="App">
               <div className="main-pane">
@@ -95,7 +104,7 @@ class App extends Component {
                   <div className="stat-boxes">
                       <BestItem item={this.props.bestItem} />
                       <GenerationsBox title="Generations"
-                        content={this.state.generations.map((gen, index) => <div key={gen.fitness} className="generation-button" onClick={this.showGen(index)}>Number {gen.generation}</div>)}
+                        content={this.state.generations.map((gen, index) => <div key={gen.generation} className="generation-button" onClick={this.showGen(index)}>Generation {gen.generation}</div>)}
                       />
                       <SomeStats
                           selectedIndividual={this.state.bestIndividual}

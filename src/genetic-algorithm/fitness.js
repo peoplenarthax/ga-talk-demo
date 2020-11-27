@@ -1,6 +1,5 @@
 import {KNAPSACK} from "./knapsack";
 import {contains, remove} from "ramda";
-import {random} from "./random";
 
 function getTotalWeightAndValue(individual, objects) {
     return individual.reduce(({weight, value}, objectIndex) =>
@@ -8,8 +7,8 @@ function getTotalWeightAndValue(individual, objects) {
         , {weight: 0, value: 0});
 }
 
-export function addFitness(chromosome, objects) {
-    let includedObjectsIndex = chromosome.reduce((acc, val, ind) => val ?
+export const fitnessKnapsack = (objects) => (genome) => {
+    let includedObjectsIndex = genome.reduce((acc, val, ind) => val ?
         [...acc, ind]
         : acc
         , []);
@@ -17,7 +16,7 @@ export function addFitness(chromosome, objects) {
 
     let totalWeightAndValue = getTotalWeightAndValue(includedObjectsIndex, objects);
     while (totalWeightAndValue.weight > KNAPSACK.size) {
-        const indexToRemove = Math.floor(random() * includedObjectsIndex.length);
+        const indexToRemove = Math.floor(Math.random() * includedObjectsIndex.length);
         const { weight, value } = objects[includedObjectsIndex[indexToRemove]];
 
         totalWeightAndValue = {
@@ -30,15 +29,15 @@ export function addFitness(chromosome, objects) {
 
     if (objectsIncluded !== includedObjectsIndex.length) {
         return {
-            chromosome: Array.from({
-                length: chromosome.length
+            genome: Array.from({
+                length: genome.length
             }, (_, index) => contains(index, includedObjectsIndex) ? 1 : 0 ),
             fitness: totalWeightAndValue.value
         };
     }
 
     return {
-        chromosome,
-        fitness: totalWeightAndValue.value
-    }
+        genome,
+        fitness:totalWeightAndValue.value
+    } 
 }

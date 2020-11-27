@@ -1,19 +1,7 @@
-import { times, concat } from 'ramda';
-import seedrandom from 'seedrandom';
-import { tournament } from "./selection";
+import { GARunner, onePointCrossOver, flipMutation, selectByTournament } from "chromosome-js"
+
 import {generateRandomBinaryArray} from './utils'
-import {flipMutation} from "./mutation";
-import {onePointCrossover} from "./crossover";
-import {addFitness} from "./fitness";
-const rng = seedrandom('its time for a real random number you know..., or31 maybe... ', { entropy: true });
-
-const byFitness = (indA, indB) => indB.fitness - indA.fitness;
-
-let POPULATION_SIZE = 100;
-const GENERATIONS = 999;
-let MUTATION_PROB = 0.4;
-let CROSSOVER_PROB = 0.8;
-const TOURNAMENT_SIZE = 5;
+import {fitnessKnapsack} from "./fitness";
 
 let objects;
 // TODO: Create prototype so setters and getters go there
@@ -24,71 +12,68 @@ export const setObjects = (newObjects) => {
 export const getObjects = () => {
     return objects;
 }
+
 const generateRandomIndividual = () => {
-    const chromosome = generateRandomBinaryArray(getObjects().length)  ;
-    return addFitness(chromosome, getObjects())
+    const chromosome = generateRandomBinaryArray(getObjects().length);
+
+    return fitnessKnapsack(getObjects())(chromosome)
 };
 
-const generateInitialPopulation = (numberOfIndividuals, ) => {
-    return times(() => generateRandomIndividual(), numberOfIndividuals)
-            .sort(byFitness);
-};
+export const startGA = async ({ onNewGeneration, gaParameters }) => {
+    const config = {
+        populationSize: gaParameters.populationSize,
+        mutationProbability: gaParameters.mutationProb / 10,
+        crossoverProbability: gaParameters.crossoverProb / 10,
+        individualValidation: true, 
+        tournamentSize: 5,
+        generations: 999
+    }
+    setTimeout(() =>
+    GARunner({ 
+        seed: generateRandomIndividual,
+        fitness:fitnessKnapsack(getObjects()), 
+        mutation: flipMutation, 
+        crossover: onePointCrossOver, 
+        selection: selectByTournament, 
+        config, 
+        hooks: {
+            onGeneration: onNewGeneration
+        } }), 0)
 
-const generateIndividualFromChromosome = (chromosome) => {
-    return addFitness(chromosome, getObjects());
-};
+    // return new Promise((resolve) => {
+    //     const initialPopulation = generateInitialPopulation(POPULATION_SIZE, objects);
+    //     let population = Array.from(initialPopulation);
+    //     for (let i = 0; i < GENERATIONS; i++) {
+    //         // TODO: Better handling async
+    //         setTimeout(() => {
+    //         console.log(`${i} generation/ BEST INDIVIDUAL: `, population[0]);
+    //         let nextPopulation = [population[0], population[1]];
+    //         while (nextPopulation.length !== initialPopulation.length) {
+    //             const [selectedIndividual1, selectedIndividual2] = tournament(2, population, { tournamentSize: TOURNAMENT_SIZE, removeWinners: true });
 
-const generateOffspring = (individual1, individual2) => {
-    const offspring = onePointCrossover(individual1.chromosome, individual2.chromosome);
-
-    return offspring.map(individual => {
-        const individualToTransform = rng() < MUTATION_PROB
-            ? flipMutation(individual)
-            : individual;
-
-        return generateIndividualFromChromosome(individualToTransform);
-    });
-};
-
-export const startGA = ({ onNewGeneration, gaParameters }) => {
-    POPULATION_SIZE = gaParameters.populationSize;
-    MUTATION_PROB = gaParameters.mutationProb / 10;
-    CROSSOVER_PROB = gaParameters.crossoverProb / 10;
-
-    return new Promise((resolve) => {
-        const initialPopulation = generateInitialPopulation(POPULATION_SIZE, objects);
-        let population = Array.from(initialPopulation);
-        for (let i = 0; i < GENERATIONS; i++) {
-            // TODO: Better handling async
-            setTimeout(() => {
-            console.log(`${i} generation/ BEST INDIVIDUAL: `, population[0]);
-            let nextPopulation = [population[0], population[1]];
-            while (nextPopulation.length !== initialPopulation.length) {
-                const [selectedIndividual1, selectedIndividual2] = tournament(2, population, { tournamentSize: TOURNAMENT_SIZE, removeWinners: true });
-
-                if (rng() < CROSSOVER_PROB) {
-                    const offspring = generateOffspring(selectedIndividual2, selectedIndividual1);
-                    nextPopulation = concat(offspring, nextPopulation);
-                } else {
-                    nextPopulation = concat([selectedIndividual1, selectedIndividual2], nextPopulation);
-                }
-            }
+    //             if (rng() < CROSSOVER_PROB) {
+    //                 const offspring = generateOffspring(selectedIndividual2, selectedIndividual1);
+    //                 nextPopulation = concat(offspring, nextPopulation);
+    //             } else {
+    //                 nextPopulation = concat([selectedIndividual1, selectedIndividual2], nextPopulation);
+    //             }
+    //         }
 
 
-            if (nextPopulation.filter(({fitness}) => population[0].fitness === fitness).length > POPULATION_SIZE/2) {
-                population = [population[0], ...generateInitialPopulation(POPULATION_SIZE - 1)];
-            } else {
-                const sortedPopulation = nextPopulation.sort(byFitness);
-                if (population[0].fitness < sortedPopulation[0].fitness ) {
-                    onNewGeneration({...nextPopulation[0], generation: i + 1});
-                }
-                population = sortedPopulation;
-            }
+    //         if (nextPopulation.filter(({fitness}) => population[0].fitness === fitness).length > POPULATION_SIZE/2) {
+    //             population = [population[0], ...generateInitialPopulation(POPULATION_SIZE - 1)];
+    //         } else {
+    //             const sortedPopulation = nextPopulation.sort(byFitness);
+    //             if (population[0].fitness < sortedPopulation[0].fitness ) {
+    //                 onNewGeneration({...nextPopulation[0], generation: i + 1});
+    //             }
+    //             population = sortedPopulation;
+    //         }
 
 
-            }, 0)
-        }
+    //         }, 0)
+    //     }
 
-        resolve('DONE');
-    });
+    //     resolve('DONE');
+    // });
 };

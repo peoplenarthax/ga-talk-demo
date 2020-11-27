@@ -19,19 +19,6 @@ export const generateRandomBinaryArray = (length) => {
     return Array.from({ length }, () => Math.round(Math.random()))
 };
 
-export const swapMutation = (chromosome) => {
-    let mutatedChromosome = chromosome;
-
-    const index1 = Math.floor(Math.random() * mutatedChromosome.length);
-    const index2 = Math.floor(Math.random() * mutatedChromosome.length);
-
-    let temp1 = mutatedChromosome[index1];
-
-    mutatedChromosome[index1] = mutatedChromosome[index2];
-    mutatedChromosome[index2] = temp1;
-
-    return mutatedChromosome;
-};
 
 export const pmxCrossover = (ind1, ind2) => {
     let _map1 = {};
