@@ -1,5 +1,4 @@
 import React from 'react';
-import {EquipmentItem} from "./EquipmentItem";
 
 export const SomeStats = ({selectedIndividual, firstGeneration, timePerGeneration}) => (
     <div className="world-items--wrapper stats">

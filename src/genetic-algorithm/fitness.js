@@ -7,6 +7,8 @@ function getTotalWeightAndValue(individual, objects) {
         , {weight: 0, value: 0});
 }
 
+// Complicated fitness since we are checking for validity of the created individuals or make them valid
+// This is a demo, do not expect the best code
 export const fitnessKnapsack = (objects) => (genome) => {
     let includedObjectsIndex = genome.reduce((acc, val, ind) => val ?
         [...acc, ind]

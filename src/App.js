@@ -57,8 +57,6 @@ class App extends Component {
 
   showGen = (index) => () =>
   {
-      console.log(index)
-      console.log(this.state.generations[index])
       this.setState({
           bestIndividual:
               {
@@ -89,7 +87,7 @@ class App extends Component {
       <div className="App">
               <div className="main-pane">
                   <div className="input-boxes">
-                    <a className="start-button" onClick={this.startGa}> Start </a>
+                    <button className="start-button" onClick={this.startGa}> Start </button>
                          <InputBox title="Population Size">
                              <input type="number" onChange={this.changePopulation} value={this.state.populationSize} />
 

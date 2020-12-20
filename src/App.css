@@ -196,6 +196,7 @@ input[type="number"] {
 
 .start-button {
     background: #7f5f41;
+    border: 0;
     display: inline-block;
     position: relative;
     text-align: center;
